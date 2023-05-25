@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract Token is ERC721, ERC721URIStorage, IERC721Receiver, Ownable {
     uint256 tokenId = 1;
     uint256 price = 1 ether;
-    mapping(uint256 => bool) public listed;
+    mapping(uint256 => bool) public isListed;
 
     constructor() ERC721("Dept Tokens", "DPT") {}
 
@@ -36,17 +36,14 @@ contract Token is ERC721, ERC721URIStorage, IERC721Receiver, Ownable {
         require(ownerOf(tokenid) == msg.sender, "You don't have the ownership!");
         approve(address(this), tokenid);
         safeTransferFrom(msg.sender, address(this), tokenid);
-        listed[tokenid] = true;
+        isListed[tokenid] = true;
     }
 
     function BuyNFTs(uint256 tokenid) public payable {
         require(ownerOf(tokenid) == address(this), "Contract doesn't own the NFT");
         require(msg.value == price, "Pay 1 ether to buy NFTs");
-        require(listed[tokenid] == true, "NFT is not listed");
-        approve(msg.sender, tokenid);
-        // setApprovalForAll(msg.sender, true);
-        safeTransferFrom(address(this), msg.sender, tokenid); 
-        // transferFrom(address(this), msg.sender, tokenid); 
+        require(isListed[tokenid] == true, "NFT is not listed");
+        _transfer(address(this), msg.sender, tokenid); 
     }
 
     function checkBalance() public onlyOwner view returns(uint256) {
